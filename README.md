@@ -14,10 +14,30 @@ Este proyecto implementa un sistema de reconocimiento facial diseñado para capt
 
 ⚠️ **Nota sobre dependencias:** Este proyecto utiliza de manera intencionada versiones antiguas de **OpenCV**, **NumPy** y **modelos pre-entrenados de OpenCV** (como clasificadores en cascada) para mantener la compatibilidad y seguir la línea de trabajo marcada en las sesiones prácticas de la asignatura.
 
+## ⚙️ Instalación y Requisitos
+
+Para el correcto funcionamiento del sistema, se deben instalar versiones específicas de las siguientes librerías dentro de tu entorno virtual:
+
+```bash
+# Instalación de la versión base de OpenCV
+pip install opencv-python==3.4.18.65
+
+# Instalación de los módulos extra de OpenCV (necesario para cv2.face)
+pip install opencv-contrib-python==3.4.18.65
+
+# NumPy suele instalarse automáticamente como dependencia, pero puedes forzarlo:
+pip install "numpy<2"
+```
+
+> [!TIP]
+> Para más detalles sobre la creación y configuración del entorno, puedes revisar el guion de la **Práctica 1 "Instalación y Segmentación de imágenes"**, disponible en el portal [Ágora (Universidad de León)](https://agora.unileon.es/).
+
+---
+
 ## 🚀 Modo de Uso
 
-### Captura de Caras (`captura-caras.py`)
-Actualmente, el script principal disponible es `captura-caras.py`, el cual se encarga de extraer y guardar las imágenes del rostro de un usuario desde la webcam.
+### 1. Captura de Caras (`captura-caras.py`)
+El script `captura-caras.py`, se encarga de extraer y guardar las imágenes del rostro de un usuario desde la webcam.
 
 **Ejecución básica (interactiva):**
 ```bash
@@ -29,6 +49,33 @@ python captura-caras.py
 ```bash
 python captura-caras.py NombreUsuario 300
 ```
+
+### 2. Entrenamiento de Caras (`entrena.py`)
+El script `entrena.py` entrena un modelo de reconocimiento facial con las caras capturadas y genera los archivos del modelo (`.yaml`) y etiquetas (`.txt`) en la carpeta `entrenamientos/`.
+
+**Ejecución básica (entrena a todas las personas capturadas):**
+```bash
+python entrena.py
+```
+
+**Ejecución con parámetros (entrena a usuarios específicos):**
+```bash
+python entrena.py persona1 persona2 persona3
+```
+
+### 3. Reconocimiento Facial en Vivo (`reconoce.py`)
+El script `reconoce.py` activa la cámara web y evalúa en tiempo real los rostros detectados frente al modelo entrenado, dibujando recuadros verdes (usuarios registrados) o rojos (desconocidos).
+
+**Ejecución básica (carga automáticamente el último modelo entrenado):**
+```bash
+python reconoce.py
+```
+
+**Ejecución especificando un modelo concreto:**
+```bash
+python reconoce.py modelo-2026-05-14-11-58.yaml
+```
+*(Para detener la ejecución, haz clic en la ventana emergente de vídeo y pulsa la tecla `q`).*
 
 ---
 
@@ -53,11 +100,11 @@ El sistema debe ser capaz de luchar contra ciertos intentos de engaño y rechaza
 ## ✅ Roadmap (Lista de Tareas)
 
 - [x] 1. Capturar caras de vídeo en streaming (`captura-caras.py`)
-- [ ] 2. Crear sistema de reconocimiento facial
-- [ ] 3. Identificar a un usuario registrado (recuadro verde + nombre)
-- [ ] 4. Identificar a un usuario NO registrado (recuadro rojo + aviso)
-- [ ] 5. Lucha contra Hacking: Detección de ataque con imagen estática (Anti-spoofing)
-- [ ] 6. Lucha contra Hacking: Detección de ataque con reproducción de vídeo (Anti-spoofing)
+- [x] 2. Crear sistema de reconocimiento facial
+- [x] 3. Identificar a un usuario registrado (recuadro verde + nombre)
+- [x] 4. Identificar a un usuario NO registrado (recuadro rojo + aviso)
+- [ ] 5. Lucha contra Hacking: Detección de ataque con imagen estática (Anti-spoofing). Posible estrategia: detección de movimiento y parpadeo.
+- [ ] 6. Lucha contra Hacking: Detección de ataque con reproducción de vídeo (Anti-spoofing). Posible estrategia: detección de patrones de iluminación, o detección de reflejos, frecuencias o texturas de pantalla.
 
 ---
 

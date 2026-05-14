@@ -80,3 +80,9 @@ venv.bak/
 
 # Ignorar la subcarpeta personas donde se guardan las capturas
 personas/
+
+# Ignorar modelos y etiquetas
+entrenamientos/*.yaml
+entrenamientos/*.txt
+
+
