@@ -103,11 +103,24 @@ El sistema debe ser capaz de luchar contra ciertos intentos de engaño y rechaza
 - [x] 2. Crear sistema de reconocimiento facial
 - [x] 3. Identificar a un usuario registrado (recuadro verde + nombre)
 - [x] 4. Identificar a un usuario NO registrado (recuadro rojo + aviso)
-- [ ] 5. Lucha contra Hacking: Detección de ataque con imagen estática (Anti-spoofing). Posible estrategia: detección de movimiento y parpadeo.
-- [ ] 6. Lucha contra Hacking: Detección de ataque con reproducción de vídeo (Anti-spoofing). Posible estrategia: detección de patrones de iluminación, o detección de reflejos, frecuencias o texturas de pantalla.
+- [x] 5. Lucha contra Hacking: Detección de ataque con imagen estática (Anti-spoofing). Posible estrategia: detección de movimiento y parpadeo.
+- [x] 6. Lucha contra Hacking: Detección de ataque con reproducción de vídeo (Anti-spoofing). Posible estrategia: detección de patrones de iluminación, o detección de reflejos, frecuencias o texturas de pantalla.
 
 ---
 
+## 🕵 Detección de Hacking ( Anti-spoofing)
+Se han tomado varias medidas para evitar ataques de spoofing:
+
+1. **Detección de movimiento en el fondo**:
+   Se ha implementado una lógica para detectar movimiento en las líneas rectas del fondo. Si se detecta movimiento en el fondo, se considera un ataque de spoofing. 
+   Si se valora todo el fondo, el movimiento sólo se ve en los bordes ya que los píxeles de una pared bien iluminada son iguales a sus vecinos. Al valorar los bordes, se evita este problema.
+   Dado que la determinación de qué es fondo viene determinada por lo que no es cara, es probable que haya elementos de la persona como el pelo o las orejas que entren en el conjunto de lo que es fondo. Valorando sólo las líneas rectas excluimos las partes todos los bordes de la imagen de la persona.
+2. **Detección de cercanía**:
+   Se ha implementado una lógica para detectar si la cara del usuario está demasiado cerca de la cámara. Si la cara ocupa más del 50% de la imagen, se le pide que se aleje.
+   Cualquier técnica anti-spoofing que se implemente se ve amenazada cuando la imagen de la cara está muy cerca y ocupa la imagen captada por la cámara. Pidiendo distancia garantizamos que parte de la imagen nos podrá servir para determinar si se está o no usando una cara real.
+3. **Estabilidad**:
+   Se ha implementado la lógica ncesaria para valorar los últimos 5 segundos teniendo que ser estable en ese periodo tanto el fondo (o las líneas rectas de este como se ha indicado en el punto 1) como la identificación del usuario.
+   En específico se guarda una marca de tiempo del último momento en el que se detectó movimiento en el fondo, y un buffer en el que se almacenan los usuarios identificados cada 10 milisegundos.
 ## 📜 Licencia
 
 Este proyecto está distribuido bajo la licencia **BSD 3-Clause**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
