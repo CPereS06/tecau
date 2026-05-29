@@ -120,7 +120,18 @@ while True:
 
     usuario_identificado = None
 
+    area_total = h_frame * w_frame
+
     for (x, y, w, h) in faces:
+        area_cara = w * h
+        if area_cara > 0.5 * area_total:
+            # Si la cara ocupa más del 50% de la imagen, pedir al usuario que se aleje
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
+            cv2.putText(frame, 'Alejate de la camara', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+            cv2.rectangle(frame, (10, 5), (450, 25), (0, 0, 255), -1)
+            cv2.putText(frame, 'Aviso: Distancia demasiado corta', (10, 20), 2, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+            continue
+
         if spoofing_detectado:
             # Si hay demasiado movimiento en el fondo o no hay referencias, invalidar
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 165, 255), 2)
