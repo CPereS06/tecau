@@ -16,7 +16,6 @@ else:
     if not os.path.exists(entrenamientos_dir):
         print(f"Error: No existe el directorio '{entrenamientos_dir}'.")
         exit()
-    # Usar os.listdir en lugar de glob
     archivos = [f for f in os.listdir(entrenamientos_dir) if f.startswith("modelo-") and f.endswith(".yaml")]
     if not archivos:
         print("Error: No se encontró ningún modelo entrenado (.yaml). Ejecuta entrena.py primero.")
