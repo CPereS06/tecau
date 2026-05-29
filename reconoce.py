@@ -71,8 +71,23 @@ while True:
     
     faces = faceClassif.detectMultiScale(gray, 1.3, 5)
 
-    # Lógica Anti-Spoofing: Analizar movimiento en el fondo de la mitad superior
-    fondo_mask = np.ones((mitad_h, w_frame), dtype=np.uint8) * 255
+    # Lógica Anti-Spoofing: Analizar movimiento en las líneas rectas del fondo
+    mitad_superior_gris = gray[0:mitad_h, :]
+    bordes = cv2.Canny(mitad_superior_gris, 50, 150, apertureSize=3)
+    lineas = cv2.HoughLinesP(bordes, 1, np.pi/180, threshold=50, minLineLength=30, maxLineGap=10)
+
+    fondo_mask = np.zeros((mitad_h, w_frame), dtype=np.uint8)
+    fondo_sospechoso = False
+    
+    if lineas is not None:
+        for linea in lineas:
+            x1, y1, x2, y2 = linea[0]
+            # Dibujar la línea de referencia en la máscara para calcular el movimiento (grosor 2)
+            cv2.line(fondo_mask, (x1, y1), (x2, y2), 255, 2)
+            # Dibujar en el frame visual en color celeste para saber qué líneas rastreamos
+            cv2.line(frame, (x1, y1), (x2, y2), (255, 255, 0), 1)
+    else:
+        fondo_sospechoso = True
     
     # Excluir las áreas de las caras del fondo
     for (x, y, w, h) in faces:
@@ -82,15 +97,22 @@ while True:
             fondo_mask[y_inicio:y_fin, x:x+w] = 0
 
     spoofing_detectado = False
-    if prev_gray is not None:
+    
+    if fondo_sospechoso:
+        spoofing_detectado = True
+        ultimo_movimiento_fondo = time.time()
+    elif prev_gray is not None:
         diff = cv2.absdiff(gray[0:mitad_h, :], prev_gray[0:mitad_h, :])
         _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
         fondo_movimiento = cv2.bitwise_and(thresh, thresh, mask=fondo_mask)
         
+        # Pintar de morado los píxeles de las líneas en movimiento (BGR: 200, 0, 200)
+        frame[0:mitad_h][fondo_movimiento == 255] = (200, 0, 200)
+        
         pixeles_movimiento = cv2.countNonZero(fondo_movimiento)
         area_fondo = cv2.countNonZero(fondo_mask)
         
-        if area_fondo > 0 and pixeles_movimiento > 0.3 * area_fondo:
+        if area_fondo > 0 and pixeles_movimiento > 0.1 * area_fondo:
             spoofing_detectado = True
             ultimo_movimiento_fondo = time.time()
 
@@ -100,11 +122,17 @@ while True:
 
     for (x, y, w, h) in faces:
         if spoofing_detectado:
-            # Si hay demasiado movimiento en el fondo, invalidar detección
+            # Si hay demasiado movimiento en el fondo o no hay referencias, invalidar
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 165, 255), 2)
             cv2.putText(frame, 'Deteccion Invalidada', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
-            cv2.rectangle(frame, (10, 5), (500, 25), (0, 165, 255), -1)
-            cv2.putText(frame, 'Aviso: Posible manipulacion (Fondo movil)', (10, 20), 2, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+            cv2.rectangle(frame, (10, 5), (550, 25), (0, 165, 255), -1)
+            
+            if fondo_sospechoso:
+                mensaje_aviso = 'Aviso: Fondo sospechoso (Sin referencias/lineas)'
+            else:
+                mensaje_aviso = 'Aviso: Posible manipulacion (Fondo movil)'
+                
+            cv2.putText(frame, mensaje_aviso, (10, 20), 2, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
             continue
 
         # Usamos la imagen en escala de grises para extraer el rostro (igual que en el entrenamiento)
